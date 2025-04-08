@@ -1,0 +1,5 @@
+connexion[flask,uvicorn,swagger-ui]>=2.14.2
+pykafka
+flask-cors
+PyYAML
+setuptools

@@ -1,0 +1,11 @@
+database:
+  host: mysql
+  port: 3307
+  user: root
+  password: example
+  db: events
+
+kafka:
+  hostname: kafka
+  port: 9092
+  topic: events

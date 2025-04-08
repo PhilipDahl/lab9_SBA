@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: Analyzer Service API
+  description: API for retrieving listing and transaction events from Kafka and computing stats
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local Flask Server
+paths:
+  /1_listing:
+    get:
+      summary: Get a specific listing event by index
+      operationId: app.get_listing_event
+      parameters:
+        - name: index
+          in: query
+          description: Index of the listing event to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Listing event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingEvent'
+        '404':
+          description: Event not found
+        '400':
+          description: Invalid or missing index parameter
+
+  /2_transaction:
+    get:
+      summary: Get a specific transaction event by index
+      operationId: app.get_transaction_event
+      parameters:
+        - name: index
+          in: query
+          description: Index of the transaction event to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Transaction event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionEvent'
+        '404':
+          description: Event not found
+        '400':
+          description: Invalid or missing index parameter
+
+  /stats:
+    get:
+      summary: Retrieve event statistics
+      operationId: app.get_event_stats
+      responses:
+        '200':
+          description: Successfully retrieved event counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStats'
+
+components:
+  schemas:
+    ListingEvent:
+      type: object
+      required:
+        - trace_id
+        - timestamp
+        - user_id
+        - item_id
+        - price
+      properties:
+        trace_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+        item_id:
+          type: string
+        price:
+          type: number
+          format: float
+
+    TransactionEvent:
+      type: object
+      required:
+        - trace_id
+        - timestamp
+        - user_id
+        - transaction_id
+        - amount
+      properties:
+        trace_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+        transaction_id:
+          type: string
+        amount:
+          type: number
+          format: float
+
+    EventStats:
+      type: object
+      properties:
+        num_listing_events:
+          type: integer
+        num_transaction_events:
+          type: integer

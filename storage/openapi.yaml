@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: DAHLA Storage API
+  version: 1.0.0
+  description: API for retrieving listing and transaction events from the database.
+
+paths:
+  /events/listings:
+    get:
+      operationId: app.get_listings
+      summary: Get listing events
+      description: Retrieve listing events within a given timestamp range.
+      parameters:
+        - in: query
+          name: start_timestamp
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: end_timestamp
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Successful listing event retrieval
+        "400":
+          description: Invalid timestamp format
+
+  /events/transactions:
+    get:
+      operationId: app.get_transactions
+      summary: Get transaction events
+      description: Retrieve transaction events within a given timestamp range.
+      parameters:
+        - in: query
+          name: start_timestamp
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: end_timestamp
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Successful transaction event retrieval
+        "400":
+          description: Invalid timestamp format

@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  title: DAHLA Events API
+  version: 1.0.0
+  description: API for handling listing and transaction events for the DAHLA platform.
+
+paths:
+  /events/listings:
+    post:
+      operationId: app.submit_listing_event
+      summary: Submit a new listing event
+      description: Endpoint to handle events where users create, edit, or delete item listings.
+      requestBody:
+        description: A listing event to be recorded
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListingEvent'
+      responses:
+        "201":
+          description: Listing event created successfully
+        "400":
+          description: Invalid input
+
+    get:
+      operationId: app.get_listings
+      summary: Get listing events by timestamp range
+      description: Returns listing events within the provided timestamp range.
+      parameters:
+        - name: start_timestamp
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end_timestamp
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A list of listing events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListingEvent'
+        "400":
+          description: Invalid timestamp format
+
+  /events/transactions:
+    post:
+      operationId: app.submit_transaction_event
+      summary: Submit a new transaction event
+      description: Endpoint to handle events where buyers initiate purchases and transactions are processed.
+      requestBody:
+        description: A transaction event to be recorded
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionEvent'
+      responses:
+        "201":
+          description: Transaction event created successfully
+        "400":
+          description: Invalid input
+
+    get:
+      operationId: app.get_transactions
+      summary: Get transaction events by timestamp range
+      description: Returns transaction events within the provided timestamp range.
+      parameters:
+        - name: start_timestamp
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end_timestamp
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A list of transaction events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionEvent'
+        "400":
+          description: Invalid timestamp format
+
+components:
+  schemas:
+    ListingEvent:
+      required:
+        - user_id
+        - item_id
+        - price
+        - timestamp
+      type: object
+      properties:
+        trace_id:
+          type: string
+          description: Unique identifier for tracing the event across services
+          example: "e4f5b1f4-87be-4b4b-8770-b4e2d84b8d01"
+        user_id:
+          type: string
+          description: The ID of the user creating the listing
+          example: "user123"
+        item_id:
+          type: string
+          description: The ID of the item being listed
+          example: "item456"
+        price:
+          type: number
+          format: float
+          description: Price of the item being listed
+          example: 129.99
+        timestamp:
+          type: string
+          format: date-time
+          description: When the listing was created
+          example: "2025-01-13T15:30:00Z"
+        description:
+          type: string
+          description: Description of the item
+          example: "A brand new limited-edition hoodie"
+
+    TransactionEvent:
+      type: object
+      required:
+        - user_id
+        - transaction_id
+        - amount
+        - timestamp
+      properties:
+        trace_id:
+          type: string
+          description: Unique identifier for tracing the event across services
+          example: "e4f5b1f4-87be-4b4b-8770-b4e2d84b8d01"
+        user_id:
+          type: string
+          description: The ID of the buyer initiating the transaction
+          example: "buyer789"
+        transaction_id:
+          type: string
+          description: Unique ID for the transaction
+          example: "txn00123"
+        amount:
+          type: number
+          format: float
+          description: The total transaction amount
+          example: 149.99
+        timestamp:
+          type: string
+          format: date-time
+          description: When the transaction occurred
+          example: "2025-01-13T15:45:00Z"
+        status:
+          type: string
+          description: Status of the transaction
+          example: "completed"

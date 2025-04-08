@@ -1,0 +1,25 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs and Data
+logs/
+data/
+
+# Docker
+*.log
+*.pid
+*.db
+
+# Environment configs
+.env
+*prod*.yaml
+*prod*.json
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store

@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/data
+    networks:
+      - internal_network
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./data/kafka:/kafka
+    networks:
+      - internal_network
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: events
+    volumes:
+      - ./data/database:/var/lib/mysql
+    networks:
+      - internal_network
+
+  receiver:
+    build:
+      context: ./receiver
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    volumes:
+      - ./config/receiver_config.yml:/config/receiver_config.yml
+      - ./config/log_conf.yml:/config/log_conf.yml
+      - ./logs:/logs
+    networks:
+      - internal_network
+
+  storage:
+    build:
+      context: ./storage
+    ports:
+      - "8090:8090"
+    depends_on:
+      - mysql
+      - kafka
+    volumes:
+      - ./config/storage_config.yml:/config/storage_config.yml
+      - ./config/log_conf.yml:/config/log_conf.yml
+      - ./logs:/logs
+    networks:
+      - internal_network
+
+  processing:
+    build:
+      context: ./processing
+    ports:
+      - "8100:8100"
+    depends_on:
+      - storage
+    volumes:
+      - ./config/processing_config.yml:/config/processing_config.yml
+      - ./config/log_conf.yml:/config/log_conf.yml
+      - ./logs:/logs
+      - ./data/processing:/data/processing
+    networks:
+      - internal_network
+
+  analyzer:
+    build:
+      context: ./analyzer
+    ports:
+      - "8110:8110"
+    depends_on:
+      - kafka
+    volumes:
+      - ./config/analyzer_config.yml:/config/analyzer_config.yml
+      - ./config/log_conf.yml:/config/log_conf.yml
+      - ./logs:/logs
+    networks:
+      - internal_network
+
+volumes:
+  zookeeper_data:
+
+networks:
+  internal_network:
+    driver: bridge
