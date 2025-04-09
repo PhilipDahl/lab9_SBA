@@ -1,5 +1,4 @@
 connexion[flask,uvicorn,swagger-ui]
-pykafka
-PyYAML
-setuptools
 httpx
+pykafka
+setuptools

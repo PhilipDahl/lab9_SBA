@@ -1,17 +1,28 @@
-FROM python:3
+FROM python:3 
 
-LABEL maintainer="pdahl5@my.bcit.ca"
+LABEL maintainer="pdahl5@bcit.ca" 
 
-RUN mkdir /app
-COPY ./requirements.txt /app/requirements.txt
-WORKDIR /app
+RUN mkdir /app 
+# We copy just the requirements.txt first to leverage Docker cache 
+# on `pip install` 
 
-RUN pip install -r requirements.txt
-COPY . /app
+COPY ./requirements.txt /app/requirements.txt 
 
-RUN chown -R nobody:nogroup /app
-USER nobody
+WORKDIR /app 
+# Install dependencies 
+RUN pip3 install -r requirements.txt 
+# Copy the source code 
+COPY . /app 
 
-EXPOSE 8100
-ENTRYPOINT ["python3"]
-CMD ["app.py"]
+# Change permissions and become a non-privileged user 
+RUN chown -R nobody:nogroup /app 
+USER nobody 
+
+# Tells on which port the service listens in the container 
+EXPOSE 8100 
+
+# Entrypoint = run Python 
+ENTRYPOINT [ "python3" ] 
+
+# Default = run app.py 
+CMD [ "app.py" ] 

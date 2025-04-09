@@ -1,0 +1,13 @@
+version: 1
+
+datastore:
+  user: root
+  password: password
+  hostname: mysql
+  port: 3306
+  db: storage
+
+kafka:
+  hostname: kafka
+  port: 9092
+  topic: events

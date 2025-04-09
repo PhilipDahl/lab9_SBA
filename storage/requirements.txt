@@ -1,8 +1,7 @@
 connexion[flask,uvicorn,swagger-ui]
+pykafka
 sqlalchemy
 mysqlclient
-pykafka
 setuptools
 pymysql
-pyyaml
 kafka-python

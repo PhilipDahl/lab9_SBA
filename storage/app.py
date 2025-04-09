@@ -10,33 +10,35 @@ import uuid
 import json
 import os
 import connexion
-from flask import request, jsonify
+from flask import request, jsonify  # still needed for request args and JSON response
 
-# === Load Service Config ===
-with open("/config/storage_config.yml", "r") as f:
+# Load configuration file for database settings
+with open("/app/config/storage/storage_conf.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 db_config = config['datastore']
+db_user = db_config['user']
+db_password = db_config['password']
+db_host = db_config['hostname']
+db_port = db_config['port']
+db_name = db_config['db']
+
+# Kafka configuration (from app_conf.yaml)
 kafka_config = config['kafka']
-
-# === Logging Setup ===
-SERVICE_NAME = "storage"
-
-with open("/config/log_conf.yml", "r") as f:
-    LOG_CONFIG = yaml.safe_load(f)
-
-os.makedirs("/logs", exist_ok=True)
-
-LOG_CONFIG['handlers']['file_handler']['filename'] = f'/logs/{SERVICE_NAME}.log'
-logging.config.dictConfig(LOG_CONFIG)
-logger = logging.getLogger(SERVICE_NAME)
-logger.info(f"{SERVICE_NAME.capitalize()} service started")
-
-# === Kafka Configuration ===
 KAFKA_SERVER = f"{kafka_config['hostname']}:{kafka_config['port']}"
 KAFKA_TOPIC = kafka_config['topic']
 
-# === Kafka Consumer Thread ===
+# Load logging configuration
+with open("/app/config/storage/storage_log_conf.yml", "r") as f:
+    LOG_CONFIG = yaml.safe_load(f.read())
+logging.config.dictConfig(LOG_CONFIG)
+
+# Create a logger object
+logger = logging.getLogger('basicLogger')
+
+
+
+
 def process_messages():
     consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=KAFKA_SERVER)
     for message in consumer:
@@ -62,7 +64,6 @@ def setup_kafka_thread():
     t1.setDaemon(True)
     t1.start()
 
-# === Dummy Parsers (for Lab testing) ===
 def parse_listing_event(event_data):
     return {
         'user_id': 'user_123',
@@ -81,7 +82,6 @@ def parse_transaction_event(event_data):
         'trace_id': str(uuid.uuid4())
     }
 
-# === Event Processing Functions ===
 def process_listing_event(body):
     session = get_session()
     try:
@@ -94,7 +94,7 @@ def process_listing_event(body):
         )
         session.add(listing_event)
         session.commit()
-        logger.debug(f"Stored listing: item {body['item_id']} (trace_id={body['trace_id']})")
+        logger.debug(f"Stored event listing for item {body['item_id']} with trace id {body['trace_id']}")
     except Exception as e:
         session.rollback()
         logger.error(f"Failed to store listing event: {e}")
@@ -113,16 +113,14 @@ def process_transaction_event(body):
         )
         session.add(transaction_event)
         session.commit()
-        logger.debug(f"Stored transaction: {body['transaction_id']} (trace_id={body['trace_id']})")
+        logger.debug(f"Stored event transaction for transaction {body['transaction_id']} with trace id {body['trace_id']}")
     except Exception as e:
         session.rollback()
         logger.error(f"Failed to store transaction event: {e}")
     finally:
         session.close()
 
-# === REST API Endpoints ===
 def get_listings():
-    logger.info("GET /events/listings")
     session = get_session()
     start_timestamp = request.args.get('start_timestamp')
     end_timestamp = request.args.get('end_timestamp')
@@ -142,7 +140,6 @@ def get_listings():
     return jsonify([listing.to_dict() for listing in listings]), 200
 
 def get_transactions():
-    logger.info("GET /events/transactions")
     session = get_session()
     start_timestamp = request.args.get('start_timestamp')
     end_timestamp = request.args.get('end_timestamp')
@@ -161,12 +158,10 @@ def get_transactions():
     session.close()
     return jsonify([transaction.to_dict() for transaction in transactions]), 200
 
-# === Health/Home Endpoint ===
 def home():
-    return "✅ Storage service is running!"
+    return "✅ You are running Connexion!"
 
-# === Connexion App Setup ===
-app = connexion.FlaskApp(__name__, specification_dir='.')
+app = connexion.App(__name__, specification_dir='.')
 app.add_api('openapi.yaml')
 app.app.add_url_rule('/', 'home', home)
 

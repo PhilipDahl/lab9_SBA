@@ -1,0 +1,13 @@
+version: 1
+datastore:
+  user: Dahla
+  password: password
+  hostname: pdahl-db-1
+  port: 3306
+  db: DahlaDB
+
+events:
+  kafka:
+    hostname: kafka
+    port: 9092
+    topic: events

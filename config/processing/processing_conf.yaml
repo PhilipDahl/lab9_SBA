@@ -1,0 +1,10 @@
+version: 1
+datastore:
+  filename: data.json
+scheduler:
+  interval: 5
+eventstores:
+  listings:
+    url: http://localhost:8090/events/listings
+  transactions:
+    url: http://localhost:8090/events/transactions

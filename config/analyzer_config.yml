@@ -1,7 +1,0 @@
-kafka:
-  hostname: kafka
-  port: 9092
-  topic: events
-
-analyzer:
-  max_events: 100  # optional: max stored events in memory

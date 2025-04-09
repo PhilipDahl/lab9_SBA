@@ -1,8 +1,0 @@
-storage:
-  url: http://storage:8090  # Or whatever your internal Docker Compose name/port is
-
-processing:
-  interval: 5  # In seconds (for apscheduler)
-
-output:
-  stats_file: /data/processing/processing.json
